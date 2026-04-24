@@ -25,7 +25,8 @@ export function UpgradeButton({
 
     try {
       const response = await fetch("/api/stripe/checkout", { method: "POST" });
-      const data = await response.json();
+      const raw = await response.text();
+      const data = raw ? JSON.parse(raw) : {};
 
       if (!response.ok || !data.url) {
         throw new Error(data.error ?? "Unable to start checkout.");
