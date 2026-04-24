@@ -5,6 +5,7 @@ import { ButtonLink } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { HistoryList } from "@/components/history-list";
+import { syncPaidCheckoutSession } from "@/lib/billing";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getUsageSummary } from "@/lib/usage";
 import type { AnalysisRecord } from "@/lib/types";
@@ -32,7 +33,7 @@ const modules = [
 export default async function DashboardPage({
   searchParams
 }: {
-  searchParams?: { checkout?: string };
+  searchParams?: { checkout?: string; session_id?: string };
 }) {
   const supabase = createSupabaseServerClient();
   const [
@@ -49,10 +50,12 @@ export default async function DashboardPage({
     return null;
   }
 
+  const checkoutState = searchParams?.checkout;
+  const checkoutSync =
+    checkoutState === "success" ? await syncPaidCheckoutSession(user.id, searchParams?.session_id) : undefined;
   const usageSummary = await getUsageSummary(supabase, user.id);
   const analyses = (analysesQuery.data ?? []) as AnalysisRecord[];
   const latest = analyses[0];
-  const checkoutState = searchParams?.checkout;
 
   return (
     <div className="space-y-8">
@@ -69,7 +72,9 @@ export default async function DashboardPage({
 
       {checkoutState === "success" ? (
         <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-700">
-          Payment received. If your plan badge has not switched to Pro yet, wait a few seconds and refresh the page.
+          {checkoutSync?.upgraded
+            ? "Payment confirmed. Your Pro plan is active."
+            : "Payment received. If your plan badge has not switched to Pro yet, wait a few seconds and refresh the page."}
         </div>
       ) : null}
 

@@ -1,6 +1,6 @@
 import Stripe from "stripe";
 import { NextResponse } from "next/server";
-import { createSupabaseAdminClient } from "@/lib/supabase/admin";
+import { grantProAccess } from "@/lib/billing";
 import { getStripeClient } from "@/lib/stripe";
 
 export async function POST(request: Request) {
@@ -26,11 +26,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: message }, { status: 400 });
   }
 
-  const supabase = createSupabaseAdminClient();
-
   switch (event.type) {
     case "checkout.session.completed":
-      await handleCheckoutCompleted(supabase, event.data.object as Stripe.Checkout.Session);
+      await handleCheckoutCompleted(event.data.object as Stripe.Checkout.Session);
       break;
     default:
       break;
@@ -39,26 +37,11 @@ export async function POST(request: Request) {
   return NextResponse.json({ received: true });
 }
 
-async function handleCheckoutCompleted(
-  supabase: ReturnType<typeof createSupabaseAdminClient>,
-  session: Stripe.Checkout.Session
-) {
+async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   const userId = session.metadata?.user_id ?? session.client_reference_id;
-  if (!userId) {
+  if (!userId || session.payment_status !== "paid") {
     return;
   }
 
-  const customerId = typeof session.customer === "string" ? session.customer : session.customer?.id ?? null;
-
-  await supabase.from("profiles").update({ plan: "pro" }).eq("id", userId);
-
-  await supabase.from("payment_records").insert({
-    user_id: userId,
-    stripe_customer_id: customerId,
-    stripe_subscription_id: null,
-    status: session.payment_status,
-    amount: session.amount_total,
-    currency: session.currency,
-    raw_payload: session
-  });
+  await grantProAccess(userId, session);
 }
