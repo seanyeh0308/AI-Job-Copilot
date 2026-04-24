@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { analysisInputSchema } from "@/lib/validations";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { generateModuleResult } from "@/lib/ai/openai";
-import { assertWithinFreeLimit, recordUsage } from "@/lib/usage";
+import { assertWithinFreeLimit, FreeLimitReachedError, recordUsage } from "@/lib/usage";
 import type { AnalysisModule } from "@/lib/constants";
 
 const activeRequests = new Map<string, number>();
@@ -41,7 +41,7 @@ export async function POST(request: Request) {
   }
 
   if (isDuplicate(user.id)) {
-    return NextResponse.json({ error: "请等待当前分析完成后再提交。" }, { status: 429 });
+    return NextResponse.json({ error: "Please wait for the current analysis to finish.", code: "DUPLICATE_REQUEST" }, { status: 429 });
   }
 
   activeRequests.set(user.id, Date.now());
@@ -81,8 +81,12 @@ export async function POST(request: Request) {
     if (analysisId) {
       await supabase.from("analyses").update({ status: "failed" }).eq("id", analysisId);
     }
-    const message = error instanceof Error ? error.message : "分析生成失败。";
-    return NextResponse.json({ error: message }, { status: 400 });
+
+    const message = error instanceof Error ? error.message : "Analysis generation failed.";
+    const status = error instanceof FreeLimitReachedError ? 403 : 400;
+    const code = error instanceof FreeLimitReachedError ? error.code : undefined;
+
+    return NextResponse.json({ error: message, code }, { status });
   } finally {
     activeRequests.delete(user.id);
   }

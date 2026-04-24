@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { analysisInputSchema } from "@/lib/validations";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { generateModuleResult } from "@/lib/ai/openai";
-import { assertWithinFreeLimit, recordUsage } from "@/lib/usage";
+import { assertWithinFreeLimit, FreeLimitReachedError, recordUsage } from "@/lib/usage";
 import type { AnalysisModule } from "@/lib/constants";
 
 export async function GET(_request: Request, { params }: { params: { id: string } }) {
@@ -82,7 +82,11 @@ export async function PATCH(request: Request, { params }: { params: { id: string
     return NextResponse.json({ id: params.id });
   } catch (error) {
     await supabase.from("analyses").update({ status: "failed" }).eq("id", params.id);
-    const message = error instanceof Error ? error.message : "重新生成失败。";
-    return NextResponse.json({ error: message }, { status: 400 });
+
+    const message = error instanceof Error ? error.message : "Analysis regeneration failed.";
+    const status = error instanceof FreeLimitReachedError ? 403 : 400;
+    const code = error instanceof FreeLimitReachedError ? error.code : undefined;
+
+    return NextResponse.json({ error: message, code }, { status });
   }
 }

@@ -8,8 +8,10 @@ const variants = {
   ghost: "text-ink hover:bg-slate-100"
 };
 
+export type ButtonVariant = keyof typeof variants;
+
 type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
-  variant?: keyof typeof variants;
+  variant?: ButtonVariant;
 };
 
 export function Button({ className, variant = "primary", ...props }: ButtonProps) {
@@ -27,7 +29,7 @@ export function Button({ className, variant = "primary", ...props }: ButtonProps
 
 type ButtonLinkProps = AnchorHTMLAttributes<HTMLAnchorElement> & {
   href: string;
-  variant?: keyof typeof variants;
+  variant?: ButtonVariant;
 };
 
 export function ButtonLink({ className, variant = "primary", href, ...props }: ButtonLinkProps) {
