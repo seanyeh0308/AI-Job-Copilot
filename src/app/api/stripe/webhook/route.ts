@@ -32,10 +32,6 @@ export async function POST(request: Request) {
     case "checkout.session.completed":
       await handleCheckoutCompleted(supabase, event.data.object as Stripe.Checkout.Session);
       break;
-    case "customer.subscription.updated":
-    case "customer.subscription.deleted":
-      await syncSubscriptionPlan(supabase, event.data.object as Stripe.Subscription);
-      break;
     default:
       break;
   }
@@ -53,46 +49,16 @@ async function handleCheckoutCompleted(
   }
 
   const customerId = typeof session.customer === "string" ? session.customer : session.customer?.id ?? null;
-  const subscriptionId =
-    typeof session.subscription === "string" ? session.subscription : session.subscription?.id ?? null;
 
   await supabase.from("profiles").update({ plan: "pro" }).eq("id", userId);
 
   await supabase.from("payment_records").insert({
     user_id: userId,
     stripe_customer_id: customerId,
-    stripe_subscription_id: subscriptionId,
+    stripe_subscription_id: null,
     status: session.payment_status,
     amount: session.amount_total,
     currency: session.currency,
     raw_payload: session
-  });
-}
-
-async function syncSubscriptionPlan(
-  supabase: ReturnType<typeof createSupabaseAdminClient>,
-  subscription: Stripe.Subscription
-) {
-  const nextPlan = ["active", "trialing"].includes(subscription.status) ? "pro" : "free";
-
-  const { data: paymentRecord } = await supabase
-    .from("payment_records")
-    .select("user_id")
-    .eq("stripe_subscription_id", subscription.id)
-    .order("created_at", { ascending: false })
-    .limit(1)
-    .maybeSingle();
-
-  if (!paymentRecord?.user_id) {
-    return;
-  }
-
-  await supabase.from("profiles").update({ plan: nextPlan }).eq("id", paymentRecord.user_id);
-  await supabase.from("payment_records").insert({
-    user_id: paymentRecord.user_id,
-    stripe_customer_id: typeof subscription.customer === "string" ? subscription.customer : subscription.customer?.id ?? null,
-    stripe_subscription_id: subscription.id,
-    status: subscription.status,
-    raw_payload: subscription
   });
 }
