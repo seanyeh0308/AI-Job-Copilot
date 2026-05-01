@@ -34,7 +34,7 @@ export default function AuthPage() {
     }
 
     if (mode === "signup" && !result.data.session) {
-      setMessage("注册成功，请检查邮箱确认链接。");
+      setMessage("Account created. Please check your inbox to confirm your email address.");
       return;
     }
 
@@ -50,12 +50,14 @@ export default function AuthPage() {
             <BriefcaseBusiness className="h-6 w-6 text-brand" />
             <h1 className="text-xl font-semibold text-ink">AI Job Copilot</h1>
           </div>
-          <p className="mt-2 text-sm text-muted">{mode === "login" ? "登录后继续分析。" : "创建账号开始免费试用。"}</p>
+          <p className="mt-2 text-sm text-muted">
+            {mode === "login" ? "Sign in to continue your analysis." : "Create an account to start your free trial."}
+          </p>
         </CardHeader>
         <CardContent>
           <form onSubmit={submit} className="space-y-4">
             <label className="block space-y-2">
-              <span className="text-sm font-medium text-ink">邮箱</span>
+              <span className="text-sm font-medium text-ink">Email</span>
               <input
                 type="email"
                 required
@@ -65,7 +67,7 @@ export default function AuthPage() {
               />
             </label>
             <label className="block space-y-2">
-              <span className="text-sm font-medium text-ink">密码</span>
+              <span className="text-sm font-medium text-ink">Password</span>
               <input
                 type="password"
                 required
@@ -78,7 +80,7 @@ export default function AuthPage() {
             {message ? <p className="rounded-md bg-slate-100 p-3 text-sm text-muted">{message}</p> : null}
             <Button type="submit" className="w-full" disabled={loading}>
               {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-              {mode === "login" ? "登录" : "注册"}
+              {mode === "login" ? "Sign in" : "Create account"}
             </Button>
           </form>
           <button
@@ -86,7 +88,7 @@ export default function AuthPage() {
             onClick={() => setMode(mode === "login" ? "signup" : "login")}
             className="mt-5 w-full text-center text-sm font-medium text-brand"
           >
-            {mode === "login" ? "没有账号？立即注册" : "已有账号？返回登录"}
+            {mode === "login" ? "No account yet? Create one" : "Already have an account? Sign in"}
           </button>
         </CardContent>
       </Card>

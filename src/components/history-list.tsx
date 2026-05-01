@@ -7,10 +7,10 @@ export function HistoryList({ analyses }: { analyses: AnalysisRecord[] }) {
   if (!analyses.length) {
     return (
       <EmptyState
-        title="暂无历史记录"
-        description="新建一次分析任务后，结果会自动保存到这里。"
+        title="No history yet"
+        description="Your generated results will be saved here after you create an analysis."
         actionHref="/dashboard/new"
-        actionLabel="新建分析"
+        actionLabel="Create Analysis"
       />
     );
   }
@@ -25,10 +25,10 @@ export function HistoryList({ analyses }: { analyses: AnalysisRecord[] }) {
         >
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <div>
-              <h3 className="font-semibold text-ink">{analysis.job_title || "未命名岗位"}</h3>
-              <p className="mt-1 text-sm text-muted">{analysis.company_name || "未填写公司"}</p>
+              <h3 className="font-semibold text-ink">{analysis.job_title || "Untitled role"}</h3>
+              <p className="mt-1 text-sm text-muted">{analysis.company_name || "Company not specified"}</p>
             </div>
-            <span className="text-sm text-muted">{new Date(analysis.updated_at).toLocaleString("zh-CN")}</span>
+            <span className="text-sm text-muted">{new Date(analysis.updated_at).toLocaleString("en-US")}</span>
           </div>
           <div className="mt-4 flex flex-wrap gap-2">
             {analysis.selected_modules.map((module) => (

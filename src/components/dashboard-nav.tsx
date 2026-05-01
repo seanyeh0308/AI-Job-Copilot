@@ -45,7 +45,7 @@ export function DashboardNav({ email }: { email?: string }) {
           {email ? <span className="max-w-48 truncate text-sm text-muted">{email}</span> : null}
           <Button type="button" variant="secondary" onClick={signOut}>
             <LogOut className="h-4 w-4" />
-            退出
+            Sign out
           </Button>
         </div>
       </div>

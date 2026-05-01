@@ -16,7 +16,7 @@ export default async function HistoryPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold text-ink">History</h1>
-        <p className="mt-2 text-muted">查看、复制或重新生成历史分析。</p>
+        <p className="mt-2 text-muted">Review, copy, or regenerate previous analyses.</p>
       </div>
       <HistoryList analyses={(data ?? []) as AnalysisRecord[]} />
     </div>

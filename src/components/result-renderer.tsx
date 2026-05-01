@@ -1,15 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import {
-  AlertTriangle,
-  BarChart3,
-  CheckCircle2,
-  ClipboardCheck,
-  FileText,
-  Lightbulb,
-  MessageSquareText
-} from "lucide-react";
+import { AlertTriangle, BarChart3, CheckCircle2, FileText, MessageSquareText } from "lucide-react";
 import { MODULE_LABELS, type AnalysisModule } from "@/lib/constants";
 import type { AnalysisResultPayload } from "@/lib/types";
 import { CopyButton } from "./copy-button";
@@ -31,7 +23,7 @@ export function ResultRenderer({
     return (
       <Card>
         <CardContent>
-          <p className="text-sm text-muted">还没有可展示的分析结果。</p>
+          <p className="text-sm text-muted">No analysis results are available yet.</p>
         </CardContent>
       </Card>
     );
@@ -71,123 +63,15 @@ export function ResultRenderer({
       </Card>
 
       {active === "resume_optimization" && results.resume_optimization ? (
-        <BusinessResumeOptimizationView result={results.resume_optimization} />
+        <ResumeOptimizationView result={results.resume_optimization} />
       ) : null}
-      {active === "interview_qa" && results.interview_qa ? <BusinessInterviewView result={results.interview_qa} /> : null}
-      {active === "match_analysis" && results.match_analysis ? <BusinessMatchView result={results.match_analysis} /> : null}
+      {active === "interview_qa" && results.interview_qa ? <InterviewView result={results.interview_qa} /> : null}
+      {active === "match_analysis" && results.match_analysis ? <MatchView result={results.match_analysis} /> : null}
     </div>
   );
 }
 
-function Section({ title, items }: { title: string; items: string[] }) {
-  return (
-    <section>
-      <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted">{title}</h3>
-      {items.length ? (
-        <ul className="space-y-2">
-          {items.map((item, index) => (
-            <li key={`${item}-${index}`} className="rounded-md bg-slate-50 p-3 text-sm leading-6 text-ink">
-              {item}
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <p className="text-sm text-muted">暂无内容</p>
-      )}
-    </section>
-  );
-}
-
-function ResumeOptimizationView({ result }: { result: NonNullable<AnalysisResultPayload["resume_optimization"]> }) {
-  return (
-    <div className="space-y-8">
-      <div className="grid gap-4 md:grid-cols-2">
-        <Section title="职责" items={result.jd_requirements.responsibilities} />
-        <Section title="硬技能" items={result.jd_requirements.hard_skills} />
-        <Section title="软技能" items={result.jd_requirements.soft_skills} />
-        <Section title="关键词" items={result.jd_requirements.keywords} />
-      </div>
-      <Section title="差距分析" items={result.gap_analysis} />
-      <div className="grid gap-4 md:grid-cols-2">
-        <Section title="Summary 建议" items={result.suggestions.summary} />
-        <Section title="Experience 建议" items={result.suggestions.experience} />
-        <Section title="Skills 建议" items={result.suggestions.skills} />
-        <Section title="Education 建议" items={result.suggestions.education} />
-      </div>
-      <section>
-        <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted">优化前 / 推荐改写后</h3>
-        <div className="space-y-3">
-          {result.rewrites.map((rewrite, index) => (
-            <div key={index} className="grid gap-3 rounded-lg border border-line p-4 md:grid-cols-2">
-              <div>
-                <p className="text-xs font-semibold text-muted">优化前</p>
-                <p className="mt-2 text-sm leading-6 text-ink">{rewrite.before}</p>
-              </div>
-              <div>
-                <p className="text-xs font-semibold text-muted">推荐改写后</p>
-                <p className="mt-2 text-sm leading-6 text-ink">{rewrite.after}</p>
-                <p className="mt-2 text-xs text-muted">{rewrite.reason}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-      <Section title="ATS 关键词" items={result.ats_keywords} />
-      <Section title="建议补充信息" items={result.missing_information} />
-    </div>
-  );
-}
-
-function InterviewView({ result }: { result: NonNullable<AnalysisResultPayload["interview_qa"]> }) {
-  return (
-    <div className="space-y-4">
-      {result.questions.map((item, index) => (
-        <article key={index} className="rounded-lg border border-line p-4">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="rounded-md bg-slate-100 px-2 py-1 text-xs font-semibold text-muted">{item.category}</span>
-            <h3 className="text-base font-semibold text-ink">{item.question}</h3>
-          </div>
-          <p className="mt-3 text-sm leading-6 text-ink">{item.answer_approach_zh}</p>
-          <p className="mt-3 rounded-md bg-blue-50 p-3 text-sm leading-6 text-blue-900">{item.concise_answer_en}</p>
-        </article>
-      ))}
-    </div>
-  );
-}
-
-function MatchView({ result }: { result: NonNullable<AnalysisResultPayload["match_analysis"]> }) {
-  const dimensions = Object.entries(result.dimension_scores);
-
-  return (
-    <div className="space-y-8">
-      <div className="rounded-lg bg-slate-900 p-6 text-white">
-        <p className="text-sm text-slate-300">总体匹配度</p>
-        <div className="mt-2 flex flex-wrap items-end gap-4">
-          <span className="text-5xl font-bold">{result.overall_score}</span>
-          <span className="mb-2 rounded-md bg-white px-3 py-1 text-sm font-semibold text-slate-900">
-            {result.recommendation}
-          </span>
-        </div>
-      </div>
-      <div className="grid gap-3 md:grid-cols-5">
-        {dimensions.map(([name, score]) => (
-          <div key={name} className="rounded-lg border border-line p-4">
-            <p className="text-xs font-semibold uppercase text-muted">{name.replace("_", " ")}</p>
-            <p className="mt-2 text-2xl font-bold text-ink">{score}</p>
-          </div>
-        ))}
-      </div>
-      <div className="grid gap-6 md:grid-cols-2">
-        <Section title="优势总结" items={result.strengths} />
-        <Section title="主要短板" items={result.weaknesses} />
-        <Section title="优先补强建议" items={result.priority_actions} />
-        <Section title="风险提示" items={result.risks} />
-      </div>
-    </div>
-  );
-}
-
-function BusinessReportCard({
+function ReportCard({
   title,
   description,
   children
@@ -207,66 +91,7 @@ function BusinessReportCard({
   );
 }
 
-function BusinessMetricCard({
-  label,
-  value,
-  tone = "neutral"
-}: {
-  label: string;
-  value: string | number;
-  tone?: "neutral" | "success" | "warning" | "info";
-}) {
-  const toneClass = {
-    neutral: "bg-slate-50 text-ink",
-    success: "bg-emerald-50 text-emerald-700",
-    warning: "bg-amber-50 text-amber-700",
-    info: "bg-blue-50 text-blue-700"
-  }[tone];
-
-  return (
-    <div className="rounded-lg border border-line bg-white p-5">
-      <p className="text-sm text-muted">{label}</p>
-      <p className={`mt-3 inline-flex rounded-md px-3 py-1 text-2xl font-semibold ${toneClass}`}>{value}</p>
-    </div>
-  );
-}
-
-function BusinessTagCloud({
-  items,
-  tone = "neutral"
-}: {
-  items: string[];
-  tone?: "neutral" | "blue" | "green" | "amber";
-}) {
-  const toneClass = {
-    neutral: "border-slate-200 bg-slate-50 text-slate-700",
-    blue: "border-blue-100 bg-blue-50 text-blue-800",
-    green: "border-emerald-100 bg-emerald-50 text-emerald-700",
-    amber: "border-amber-100 bg-amber-50 text-amber-700"
-  }[tone];
-
-  if (!items.length) {
-    return <p className="text-sm text-muted">No content yet.</p>;
-  }
-
-  return (
-    <div className="flex flex-wrap gap-2">
-      {items.map((item, index) => (
-        <span key={`${item}-${index}`} className={`rounded-md border px-2.5 py-1 text-xs font-semibold ${toneClass}`}>
-          {item}
-        </span>
-      ))}
-    </div>
-  );
-}
-
-function BusinessInsightList({
-  items,
-  tone = "neutral"
-}: {
-  items: string[];
-  tone?: "neutral" | "warning" | "success";
-}) {
+function InsightList({ items, tone = "neutral" }: { items: string[]; tone?: "neutral" | "warning" | "success" }) {
   const iconClass =
     tone === "warning"
       ? "bg-amber-50 text-amber-700"
@@ -292,44 +117,55 @@ function BusinessInsightList({
   );
 }
 
-function BusinessResumeOptimizationView({ result }: { result: NonNullable<AnalysisResultPayload["resume_optimization"]> }) {
-  const keywordCount = result.jd_requirements.keywords.length;
-  const gapCount = result.gap_analysis.length;
-  const atsCount = result.ats_keywords.length;
-  const missingCount = result.missing_information.length;
+function TagCloud({ items, tone = "neutral" }: { items: string[]; tone?: "neutral" | "blue" | "green" | "amber" }) {
+  const toneClass = {
+    neutral: "border-slate-200 bg-slate-50 text-slate-700",
+    blue: "border-blue-100 bg-blue-50 text-blue-800",
+    green: "border-emerald-100 bg-emerald-50 text-emerald-700",
+    amber: "border-amber-100 bg-amber-50 text-amber-700"
+  }[tone];
+
+  if (!items.length) {
+    return <p className="text-sm text-muted">No content yet.</p>;
+  }
 
   return (
+    <div className="flex flex-wrap gap-2">
+      {items.map((item, index) => (
+        <span key={`${item}-${index}`} className={`rounded-md border px-2.5 py-1 text-xs font-semibold ${toneClass}`}>
+          {item}
+        </span>
+      ))}
+    </div>
+  );
+}
+
+function ResumeOptimizationView({ result }: { result: NonNullable<AnalysisResultPayload["resume_optimization"]> }) {
+  return (
     <div className="space-y-6">
-      <div className="grid gap-4 md:grid-cols-4">
-        <BusinessMetricCard label="JD Keywords" value={keywordCount} tone="info" />
-        <BusinessMetricCard label="Resume Gaps" value={gapCount} tone={gapCount ? "warning" : "success"} />
-        <BusinessMetricCard label="ATS Keywords" value={atsCount} tone="success" />
-        <BusinessMetricCard label="Info to Add" value={missingCount} tone={missingCount ? "warning" : "neutral"} />
-      </div>
-
-      <BusinessReportCard title="JD Core Requirements" description="Key responsibilities, skills, and preferred qualifications extracted from the JD.">
+      <ReportCard title="JD Core Requirements" description="Key responsibilities, skills, and keywords extracted from the job description.">
         <div className="grid gap-5 lg:grid-cols-2">
-          <BusinessRequirementBlock title="Responsibilities" items={result.jd_requirements.responsibilities} />
-          <BusinessRequirementBlock title="Hard Skills" items={result.jd_requirements.hard_skills} tone="blue" />
-          <BusinessRequirementBlock title="Soft Skills" items={result.jd_requirements.soft_skills} tone="green" />
-          <BusinessRequirementBlock title="Nice-to-have" items={result.jd_requirements.nice_to_have} tone="amber" />
+          <RequirementBlock title="Responsibilities" items={result.jd_requirements.responsibilities} />
+          <RequirementBlock title="Hard Skills" items={result.jd_requirements.hard_skills} tone="blue" />
+          <RequirementBlock title="Soft Skills" items={result.jd_requirements.soft_skills} tone="green" />
+          <RequirementBlock title="Nice-to-have" items={result.jd_requirements.nice_to_have} tone="amber" />
         </div>
-      </BusinessReportCard>
+      </ReportCard>
 
-      <BusinessReportCard title="Resume Gap Analysis" description="Prioritized issues to address before submitting this application.">
-        <BusinessInsightList items={result.gap_analysis} tone="warning" />
-      </BusinessReportCard>
+      <ReportCard title="Resume Gap Analysis" description="Prioritized issues to address before submitting this application.">
+        <InsightList items={result.gap_analysis} tone="warning" />
+      </ReportCard>
 
-      <BusinessReportCard title="Optimization Suggestions" description="Concrete edits grouped by resume section.">
+      <ReportCard title="Optimization Suggestions" description="Concrete edits grouped by resume section.">
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-          <BusinessSuggestionBlock title="Summary" items={result.suggestions.summary} />
-          <BusinessSuggestionBlock title="Experience" items={result.suggestions.experience} />
-          <BusinessSuggestionBlock title="Skills" items={result.suggestions.skills} />
-          <BusinessSuggestionBlock title="Education" items={result.suggestions.education} />
+          <SuggestionBlock title="Summary" items={result.suggestions.summary} />
+          <SuggestionBlock title="Experience" items={result.suggestions.experience} />
+          <SuggestionBlock title="Skills" items={result.suggestions.skills} />
+          <SuggestionBlock title="Education" items={result.suggestions.education} />
         </div>
-      </BusinessReportCard>
+      </ReportCard>
 
-      <BusinessReportCard title="Before / Recommended Rewrite" description="Copy-ready phrasing that keeps the user's actual experience intact.">
+      <ReportCard title="Before / Recommended Rewrite" description="Copy-ready phrasing that keeps the user's actual experience intact.">
         <div className="space-y-4">
           {result.rewrites.map((rewrite, index) => (
             <div key={index} className="rounded-lg border border-line bg-white">
@@ -353,40 +189,21 @@ function BusinessResumeOptimizationView({ result }: { result: NonNullable<Analys
             </div>
           ))}
         </div>
-      </BusinessReportCard>
+      </ReportCard>
 
       <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-        <BusinessReportCard title="ATS Keyword Suggestions" description="Add these where they are true and supported by experience.">
-          <div className="space-y-5">
-            <div>
-              <p className="mb-2 text-xs font-semibold uppercase text-muted">Must Cover</p>
-              <BusinessTagCloud items={result.ats_keywords.slice(0, 6)} tone="blue" />
-            </div>
-            <div>
-              <p className="mb-2 text-xs font-semibold uppercase text-muted">Recommended</p>
-              <BusinessTagCloud items={result.ats_keywords.slice(6, 12)} tone="green" />
-            </div>
-          </div>
-        </BusinessReportCard>
-        <BusinessReportCard title="Information to Add" description="Missing evidence that would make the resume stronger.">
-          <div className="rounded-lg border border-amber-100 bg-amber-50 p-4">
-            <div className="flex items-start gap-3">
-              <Lightbulb className="mt-0.5 h-5 w-5 shrink-0 text-amber-700" />
-              <div>
-                <p className="font-semibold text-amber-900">Suggested additions</p>
-                <div className="mt-3">
-                  <BusinessInsightList items={result.missing_information} tone="warning" />
-                </div>
-              </div>
-            </div>
-          </div>
-        </BusinessReportCard>
+        <ReportCard title="ATS Keyword Suggestions" description="Add these where they are true and supported by experience.">
+          <TagCloud items={result.ats_keywords} tone="blue" />
+        </ReportCard>
+        <ReportCard title="Information to Add" description="Missing evidence that would make the resume stronger.">
+          <InsightList items={result.missing_information} tone="warning" />
+        </ReportCard>
       </div>
     </div>
   );
 }
 
-function BusinessRequirementBlock({
+function RequirementBlock({
   title,
   items,
   tone = "neutral"
@@ -398,24 +215,21 @@ function BusinessRequirementBlock({
   return (
     <div className="rounded-lg border border-line bg-slate-50 p-4">
       <p className="mb-3 text-sm font-semibold text-ink">{title}</p>
-      <BusinessTagCloud items={items} tone={tone} />
+      <TagCloud items={items} tone={tone} />
     </div>
   );
 }
 
-function BusinessSuggestionBlock({ title, items }: { title: string; items: string[] }) {
+function SuggestionBlock({ title, items }: { title: string; items: string[] }) {
   return (
     <div className="rounded-lg border border-line bg-white p-4">
-      <div className="mb-3 flex items-center gap-2">
-        <ClipboardCheck className="h-4 w-4 text-brand" />
-        <p className="font-semibold text-ink">{title}</p>
-      </div>
-      <BusinessInsightList items={items} />
+      <p className="mb-3 font-semibold text-ink">{title}</p>
+      <InsightList items={items} />
     </div>
   );
 }
 
-function BusinessInterviewView({ result }: { result: NonNullable<AnalysisResultPayload["interview_qa"]> }) {
+function InterviewView({ result }: { result: NonNullable<AnalysisResultPayload["interview_qa"]> }) {
   const categories = Array.from(new Set(result.questions.map((question) => question.category)));
 
   return (
@@ -424,7 +238,7 @@ function BusinessInterviewView({ result }: { result: NonNullable<AnalysisResultP
         <CardContent className="flex flex-wrap gap-2">
           {categories.map((category) => (
             <span key={category} className="rounded-md border border-line bg-white px-3 py-2 text-sm font-semibold text-muted">
-              {category}
+              {formatCategory(category)}
             </span>
           ))}
         </CardContent>
@@ -437,7 +251,7 @@ function BusinessInterviewView({ result }: { result: NonNullable<AnalysisResultP
               <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
                 <div>
                   <span className="rounded-md bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-800">
-                    {item.category}
+                    {formatCategory(item.category)}
                   </span>
                   <h3 className="mt-3 text-base font-semibold leading-7 text-ink">{item.question}</h3>
                 </div>
@@ -445,11 +259,11 @@ function BusinessInterviewView({ result }: { result: NonNullable<AnalysisResultP
               </div>
               <div className="mt-5 grid gap-4 lg:grid-cols-2">
                 <div className="rounded-lg border border-line bg-slate-50 p-4">
-                  <p className="text-xs font-semibold uppercase text-muted">中文答题思路</p>
+                  <p className="text-xs font-semibold uppercase text-muted">Answer Strategy</p>
                   <p className="mt-2 text-sm leading-7 text-ink">{item.answer_approach_zh}</p>
                 </div>
                 <div className="rounded-lg border border-blue-100 bg-blue-50 p-4">
-                  <p className="text-xs font-semibold uppercase text-blue-800">English concise answer</p>
+                  <p className="text-xs font-semibold uppercase text-blue-800">Concise Answer</p>
                   <p className="mt-2 text-sm leading-7 text-blue-950">{item.concise_answer_en}</p>
                 </div>
               </div>
@@ -461,7 +275,7 @@ function BusinessInterviewView({ result }: { result: NonNullable<AnalysisResultP
   );
 }
 
-function BusinessMatchView({ result }: { result: NonNullable<AnalysisResultPayload["match_analysis"]> }) {
+function MatchView({ result }: { result: NonNullable<AnalysisResultPayload["match_analysis"]> }) {
   const dimensions = Object.entries(result.dimension_scores);
   const strong = result.overall_score >= 75;
   const caution = result.overall_score >= 60 && result.overall_score < 75;
@@ -491,12 +305,12 @@ function BusinessMatchView({ result }: { result: NonNullable<AnalysisResultPaylo
         </CardContent>
       </Card>
 
-      <BusinessReportCard title="Dimension Breakdown" description="How the resume matches across key hiring criteria.">
+      <ReportCard title="Dimension Breakdown" description="How the resume matches across key hiring criteria.">
         <div className="space-y-5">
           {dimensions.map(([name, score]) => (
             <div key={name}>
               <div className="mb-2 flex items-center justify-between">
-                <p className="text-sm font-semibold text-ink">{businessDimensionLabel(name)}</p>
+                <p className="text-sm font-semibold text-ink">{dimensionLabel(name)}</p>
                 <p className="text-sm font-semibold text-muted">{score}/100</p>
               </div>
               <div className="h-2.5 rounded-full bg-slate-100">
@@ -508,20 +322,20 @@ function BusinessMatchView({ result }: { result: NonNullable<AnalysisResultPaylo
             </div>
           ))}
         </div>
-      </BusinessReportCard>
+      </ReportCard>
 
       <div className="grid gap-6 lg:grid-cols-2">
-        <BusinessReportCard title="Key Strengths" description="Why this application is competitive.">
-          <BusinessInsightList items={result.strengths} tone="success" />
-        </BusinessReportCard>
-        <BusinessReportCard title="Areas to Strengthen" description="Gaps to address before applying.">
-          <BusinessInsightList items={result.weaknesses} tone="warning" />
-        </BusinessReportCard>
+        <ReportCard title="Key Strengths" description="Why this application is competitive.">
+          <InsightList items={result.strengths} tone="success" />
+        </ReportCard>
+        <ReportCard title="Areas to Strengthen" description="Gaps to address before applying.">
+          <InsightList items={result.weaknesses} tone="warning" />
+        </ReportCard>
       </div>
 
-      <BusinessReportCard title="Priority Action Items" description="The highest leverage edits before submission.">
-        <BusinessInsightList items={result.priority_actions} />
-      </BusinessReportCard>
+      <ReportCard title="Priority Action Items" description="The highest leverage edits before submission.">
+        <InsightList items={result.priority_actions} />
+      </ReportCard>
 
       <div className="rounded-lg border border-amber-100 bg-amber-50 p-5">
         <div className="flex gap-3">
@@ -542,7 +356,14 @@ function BusinessMatchView({ result }: { result: NonNullable<AnalysisResultPaylo
   );
 }
 
-function businessDimensionLabel(name: string) {
+function formatCategory(category: string) {
+  return category
+    .split("_")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+}
+
+function dimensionLabel(name: string) {
   const labels: Record<string, string> = {
     experience: "Experience",
     skills: "Skills",
@@ -551,5 +372,5 @@ function businessDimensionLabel(name: string) {
     nice_to_have: "Nice-to-have"
   };
 
-  return labels[name] ?? name;
+  return labels[name] ?? formatCategory(name);
 }

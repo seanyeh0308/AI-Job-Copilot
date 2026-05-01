@@ -48,7 +48,7 @@ export type MatchAnalysisResult = {
   weaknesses: string[];
   priority_actions: string[];
   risks: string[];
-  recommendation: "建议投递" | "谨慎投递" | "不建议优先投递";
+  recommendation: "Strong fit" | "Apply with caution" | "Low priority";
 };
 
 export type AnalysisResultPayload = Partial<{

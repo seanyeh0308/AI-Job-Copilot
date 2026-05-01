@@ -16,7 +16,7 @@ export class FreeLimitReachedError extends Error {
   code = "FREE_LIMIT_REACHED" as const;
 
   constructor(limit: number) {
-    super(`免费试用次数已用完。当前限制为 ${limit} 次，请升级到 Pro 后继续生成。`);
+    super(`Your free trial is used up. The current limit is ${limit} analyses. Upgrade to Pro to keep generating results.`);
     this.name = "FreeLimitReachedError";
   }
 }
