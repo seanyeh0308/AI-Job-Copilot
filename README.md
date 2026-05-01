@@ -1,6 +1,6 @@
 # AI Job Copilot
 
-AI Job Copilot 是一个面向求职者的 Next.js MVP：根据职位描述和简历内容，生成简历优化建议、面试问答和岗位匹配分析。当前版本优先保证可运行、可部署、可演示，并为 Supabase、OpenAI、Stripe、Vercel 部署留好扩展结构。
+AI Job Copilot 是一个面向求职者的 Next.js MVP：根据职位描述和简历内容，生成简历优化建议、面试问答和岗位匹配分析。当前版本优先保证可运行、可部署、可演示，并为 Supabase、DeepSeek、Stripe、Vercel 部署留好扩展结构。
 
 ## 1. 项目目录结构
 
@@ -35,7 +35,7 @@ AI Job Copilot 是一个面向求职者的 Next.js MVP：根据职位描述和�
 │   └── lib
 │       ├── ai
 │       │   ├── mock.ts
-│       │   ├── openai.ts
+│       │   ├── deepseek.ts
 │       │   └── prompts.ts
 │       ├── supabase
 │       ├── constants.ts
@@ -91,8 +91,8 @@ AI Job Copilot 是一个面向求职者的 Next.js MVP：根据职位描述和�
 AI 逻辑在 `src/lib/ai`：
 
 - `prompts.ts`：三个模块独立 prompt builder。
-- `openai.ts`：统一 OpenAI 调用，要求 JSON 输出。
-- `mock.ts`：未配置 `OPENAI_API_KEY` 时返回结构化 demo 结果，方便本地演示。
+- `deepseek.ts`：统一 DeepSeek API 调用，要求 JSON 输出。
+- `mock.ts`：未配置 `DEEPSEEK_API_KEY` 时返回结构化 demo 结果，方便本地演示。
 
 输出优先 JSON，再由前端格式化。Prompt 已明确约束不虚构用户经历，信息不足时标注建议补充信息。
 
@@ -139,15 +139,16 @@ NEXT_PUBLIC_APP_URL=
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
 SUPABASE_SERVICE_ROLE_KEY=
-OPENAI_API_KEY=
-OPENAI_MODEL=
+DEEPSEEK_API_KEY=
+DEEPSEEK_BASE_URL=https://api.deepseek.com
+DEEPSEEK_MODEL=deepseek-v4-flash
 STRIPE_SECRET_KEY=
 STRIPE_WEBHOOK_SECRET=
 NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=
 STRIPE_PRICE_ID=
 ```
 
-`OPENAI_MODEL` 可先留空，代码默认使用 `gpt-4o-mini`。未配置 OpenAI key 时，应用会使用 mock 结果，便于演示页面。
+`DEEPSEEK_MODEL` 可先留空，代码默认使用 `deepseek-v4-flash`。未配置 DeepSeek key 时，应用会使用 mock 结果，便于演示页面。
 
 ### Vercel 部署
 

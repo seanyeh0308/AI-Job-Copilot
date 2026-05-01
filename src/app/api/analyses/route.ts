@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { analysisInputSchema } from "@/lib/validations";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { generateModuleResult } from "@/lib/ai/openai";
+import { generateModuleResult } from "@/lib/ai/deepseek";
 import { assertWithinFreeLimit, FreeLimitReachedError, recordUsage } from "@/lib/usage";
 import type { AnalysisModule } from "@/lib/constants";
 
