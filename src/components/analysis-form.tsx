@@ -76,8 +76,11 @@ export function AnalysisForm({
         throw new Error(data.error ?? "Failed to generate analysis.");
       }
 
+      if (!data.id) {
+        throw new Error("Analysis was generated, but the result link was not returned.");
+      }
+
       router.push(`/dashboard/results/${data.id}`);
-      router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to generate analysis.");
     } finally {
