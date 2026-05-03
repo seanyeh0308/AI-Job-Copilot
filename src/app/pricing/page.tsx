@@ -51,6 +51,23 @@ export default function PricingPage() {
           </CardContent>
         </Card>
       </section>
+
+      <footer className="border-t border-line bg-white">
+        <div className="mx-auto flex max-w-4xl flex-col gap-3 px-4 py-8 text-sm text-muted md:flex-row md:items-center md:justify-between">
+          <p>&copy; 2026 {siteConfig.legalName}. All rights reserved.</p>
+          <div className="flex flex-wrap gap-4">
+            <a className="hover:text-ink" href="/terms">
+              Terms
+            </a>
+            <a className="hover:text-ink" href="/privacy">
+              Privacy
+            </a>
+            <a className="hover:text-ink" href="/refund-policy">
+              Refund Policy
+            </a>
+          </div>
+        </div>
+      </footer>
     </main>
   );
 }
