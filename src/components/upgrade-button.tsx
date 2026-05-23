@@ -1,9 +1,9 @@
 "use client";
 
-import { CreditCard, Loader2 } from "lucide-react";
-import { useState } from "react";
+import { clsx } from "clsx";
+import { ExternalLink, Mail, QrCode } from "lucide-react";
 import type { ButtonVariant } from "./ui/button";
-import { Button } from "./ui/button";
+import { siteConfig } from "@/lib/site";
 
 type UpgradeButtonProps = {
   label?: string;
@@ -16,36 +16,55 @@ export function UpgradeButton({
   variant = "primary",
   className
 }: UpgradeButtonProps) {
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-
-  async function startCheckout() {
-    setLoading(true);
-    setError("");
-
-    try {
-      const response = await fetch("/api/stripe/checkout", { method: "POST" });
-      const raw = await response.text();
-      const data = raw ? JSON.parse(raw) : {};
-
-      if (!response.ok || !data.url) {
-        throw new Error(data.error ?? "Unable to start checkout.");
-      }
-
-      window.location.href = data.url;
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Unable to start checkout.");
-      setLoading(false);
-    }
-  }
-
   return (
-    <div className="space-y-2">
-      <Button type="button" variant={variant} className={className} onClick={startCheckout} disabled={loading}>
-        {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <CreditCard className="h-4 w-4" />}
-        {loading ? "Redirecting..." : label}
-      </Button>
-      {error ? <p className="text-sm text-red-600">{error}</p> : null}
+    <div
+      className={clsx(
+        "rounded-lg border border-line bg-white p-4 shadow-sm",
+        variant === "secondary" ? "bg-slate-50" : null,
+        className
+      )}
+    >
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+        <div className="mx-auto flex h-48 w-44 shrink-0 items-center justify-center rounded-md border border-line bg-white p-2">
+          <img
+            src={siteConfig.paypalQrCodePath}
+            alt={`PayPal payment QR code for ${siteConfig.name}`}
+            className="h-full w-full object-contain"
+          />
+        </div>
+
+        <div className="min-w-0 space-y-3">
+          <div className="flex items-center gap-2 text-sm font-semibold text-brand">
+            <QrCode className="h-4 w-4" />
+            <span>{label}</span>
+          </div>
+          <p className="text-sm leading-6 text-muted">
+            Scan the PayPal QR code to buy Pro access, or open the PayPal payment page directly.
+          </p>
+          <p className="text-xs leading-5 text-muted">
+            After payment, email your account address and receipt to {siteConfig.contactEmail} so we can activate Pro
+            access.
+          </p>
+          <div className="flex flex-wrap gap-2">
+            <a
+              href={siteConfig.paypalPaymentLink}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-brand px-3 text-sm font-semibold text-white transition hover:bg-blue-900"
+            >
+              <ExternalLink className="h-4 w-4" />
+              Open PayPal
+            </a>
+            <a
+              href={`mailto:${siteConfig.contactEmail}?subject=AI%20Job%20Copilot%20Pro%20activation`}
+              className="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-line bg-white px-3 text-sm font-semibold text-ink transition hover:bg-slate-50"
+            >
+              <Mail className="h-4 w-4" />
+              Email receipt
+            </a>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
